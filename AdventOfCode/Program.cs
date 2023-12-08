@@ -1,4 +1,4 @@
 ﻿
 using AdventOfCode;
 
-Task1.ProcessFile();
+Task1_1.ProcessFile();
