@@ -42,9 +42,9 @@ public class Task2_2
             Blue = Math.Max(Blue, otherStatus.Blue);
         }
 
-        public bool IsPossible()
+        public int GetPower()
         {
-            return Red <= 12 && Green <= 13 && Blue <= 14;
+            return Red * Green * Blue;
         }
     }
 
@@ -71,6 +71,6 @@ public class Task2_2
             gameStatus.GetMaxStatus(grabStatus);
         }
 
-        return gameStatus.IsPossible() ? gameId : 0;
+        return gameStatus.GetPower();
     }
 }
