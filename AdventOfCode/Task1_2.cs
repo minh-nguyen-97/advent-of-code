@@ -11,18 +11,40 @@ public class Task1_2
         {
             sum += ProcessLine(line);
         }
-        
+
         Console.WriteLine(sum);
     }
 
-    public static int ProcessLine(string line)
+    static readonly string[] letterDigits = { "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
+
+    static int IsDigitAndLetter(string line, int currentPos)
+    {
+        if (Char.IsDigit(line[currentPos])) return line[currentPos] - '0';
+        
+        for (int i = 0; i < letterDigits.Length; i++)
+        {
+            var realDigit = i + 1;
+            var letterLength = letterDigits[i].Length;
+            if (currentPos + letterLength - 1 < line.Length)
+            {
+                if (line.Substring(currentPos, letterLength).Equals(letterDigits[i]))
+                {
+                    return realDigit;
+                } 
+            }
+        }
+
+        return -1;
+    }
+    static int ProcessLine(string line)
     {
         var firstDigit = -1;
         for (int i = 0; i < line.Length; i++)
         {
-            if (Char.IsDigit(line[i]) && line[i] != '0')
+            var digit = IsDigitAndLetter(line, i);
+            if (digit > 0)
             {
-                firstDigit = line[i] - '0';
+                firstDigit = digit;
                 break;
             }
         }
@@ -35,9 +57,10 @@ public class Task1_2
         var lastDigit = -1;
         for (int i = line.Length - 1; i >= 0; i--)
         {
-            if (Char.IsDigit(line[i]))
+            var digit = IsDigitAndLetter(line, i);
+            if (digit >= 0)
             {
-                lastDigit = line[i] - '0';
+                lastDigit = digit;
                 break;
             }
         }
