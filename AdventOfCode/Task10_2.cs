@@ -45,18 +45,99 @@ public class Task10_2
             }
         }
 
-        var result = 0;
-        // var pipeType = 'F';
+        var maxSteps = 0;
+        HashSet<(int, int)> cellsOnTheLoop = new HashSet<(int, int)>();
+        var finalStartPipeType = 'S';
         foreach (var pipeType in reachableList.Keys)
         {
-            var numberOfStepsInLoop = HandleStartingType(lines, startPos, pipeType);
-            result = Math.Max(result, numberOfStepsInLoop);
+            var (numberOfStepsInLoop, tempCellsOnTheLoop) = HandleStartingType(lines, startPos, pipeType);
+            if (numberOfStepsInLoop > maxSteps)
+            {
+                finalStartPipeType = pipeType;
+                maxSteps = numberOfStepsInLoop;
+                cellsOnTheLoop = tempCellsOnTheLoop;
+            }
         }
         
-        return result / 2;
+        var temp = new StringBuilder(lines[startPos.Item1]);
+        temp[startPos.Item2] = finalStartPipeType;
+        lines[startPos.Item1] = temp.ToString();
+
+        SortedDictionary<int, SortedSet<int>> loopMap = new SortedDictionary<int, SortedSet<int>>();
+
+        foreach (var cell in cellsOnTheLoop)
+        {
+            if (!loopMap.ContainsKey(cell.Item1)) loopMap[cell.Item1] = new SortedSet<int>();
+            loopMap[cell.Item1].Add(cell.Item2);
+        }
+
+        var result = 0;
+        foreach (var row in loopMap.Keys)
+        {
+            var colsArray = loopMap[row].ToArray();
+            var verticalWalls = new List<int>();
+
+            var firstCornerCol = -1;
+            foreach (var col in colsArray)
+            {
+                if (lines[row][col] == '|') verticalWalls.Add(col);
+                if (IsCorner(lines[row][col]))
+                {
+                    if (firstCornerCol == -1)
+                    {
+                        firstCornerCol = col;
+                    }
+                    else
+                    {
+                        var firstCorner = lines[row][firstCornerCol];
+                        var secondCorner = lines[row][col];
+                        if (IsSameCorner(firstCorner, secondCorner))
+                        {
+                            verticalWalls.Add(firstCornerCol);
+                            verticalWalls.Add(col);
+                        }
+                        else
+                        {
+                            verticalWalls.Add(col);
+                        }
+
+                        firstCornerCol = -1;
+                    }
+                }
+            }
+
+            var verticalWallsArray = verticalWalls.ToArray();
+            for (int j = 0; j < verticalWallsArray.Length - 1; j += 2)
+            {
+                var startCol = verticalWallsArray[j];
+                var endCol = verticalWallsArray[j + 1];
+                for (int k = startCol; k <= endCol; k++)
+                {
+                    if (!cellsOnTheLoop.Contains((row, k))) result++;
+                }
+            }
+        }
+        
+        return result;
     }
 
-    static int HandleStartingType(string[] lines, (int, int) startPos, Char startPipeType)
+    static bool IsCorner(Char c)
+    {
+        return c == 'L' || c == 'F' || c == 'J' || c == '7';
+    }
+
+    static bool IsSameCorner(Char c1, Char c2)
+    {
+        return (c1 == 'L' && c2 == 'J') || (c1 == 'F' && c2 == '7');
+    }
+    
+    
+    static bool IsDifferentCorner(Char c1, Char c2)
+    {
+        return (c1 == 'L' && c2 == '7') || (c1 == 'F' && c2 == 'J');
+    }
+
+    static (int, HashSet<(int, int)>) HandleStartingType(string[] lines, (int, int) startPos, Char startPipeType)
     {
         var temp = new StringBuilder(lines[startPos.Item1]);
         temp[startPos.Item2] = startPipeType;
@@ -107,7 +188,7 @@ public class Task10_2
         return results;
     }
     
-    static int BFS(string[] lines, (int, int) startPos, Char startPipeType)
+    static (int, HashSet<(int, int)>) BFS(string[] lines, (int, int) startPos, Char startPipeType)
     {
         var visitedCells = new Dictionary<(int, int), Cell>();
         var queueingCells = new Queue<Cell>();
@@ -115,6 +196,7 @@ public class Task10_2
         queueingCells.Enqueue(startCell);
 
         var numberOfStepsInLoop = 0;
+        HashSet<(int, int)> cellsOnTheLoop = new HashSet<(int, int)>();
 
         while (queueingCells.Count > 0)
         {
@@ -142,6 +224,8 @@ public class Task10_2
                     {
                         var nextCell = visitedCells[nextCellCoor];
                         numberOfStepsInLoop = currentCell.StepsFromStart.Count + nextCell.StepsFromStart.Count - 1;
+                        cellsOnTheLoop = new HashSet<(int, int)>(currentCell.StepsFromStart);
+                        cellsOnTheLoop.UnionWith(nextCell.StepsFromStart);
                         break;
                     }
                 }
@@ -150,6 +234,6 @@ public class Task10_2
             if (numberOfStepsInLoop > 0) break;
         }
 
-        return numberOfStepsInLoop;
+        return (numberOfStepsInLoop, cellsOnTheLoop);
     }
 }
