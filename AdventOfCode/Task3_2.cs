@@ -4,21 +4,24 @@ public class Task3_2
 {
     public static void ProcessFile()
     {
-        var lines = File.ReadLines("../../../example.txt");
+        var lines = File.ReadLines("../../../task3.txt");
 
         var sum = 0;
         var prevLine = "";
         Dictionary<int, NumberInLine> prevLinePosToNumberMap = new Dictionary<int, NumberInLine>();
+        Dictionary<int, GearAdjacentNumbers> prevLineGearAdjacentNumbers = new Dictionary<int, GearAdjacentNumbers>();
         foreach (var line in lines)
         {
-            var (sumOfPrevLine, currentPosToNumberMap)= SumOfValidNumberInPreviousLine(line, prevLine, prevLinePosToNumberMap);
+            var (sumOfPrevLine, currentPosToNumberMap, currentGearAdjacentNumbers)= SumOfValidNumberInPreviousLine(line, prevLine, 
+            prevLinePosToNumberMap, prevLineGearAdjacentNumbers);
             sum += sumOfPrevLine;
 
             prevLine = line;
             prevLinePosToNumberMap = currentPosToNumberMap;
+            prevLineGearAdjacentNumbers = currentGearAdjacentNumbers;
         }
 
-        var sumOfLastLine = CalculateValidNumbers(prevLinePosToNumberMap);
+        var sumOfLastLine = CalculatePrevLineGearRatio(prevLineGearAdjacentNumbers);
         sum += sumOfLastLine;
 
         Console.WriteLine(sum);
@@ -29,57 +32,76 @@ public class Task3_2
         public int StartPos;
         public int EndPos;
         public int Value;
-        public bool IsValid;
-        public bool IsAddedToTotalSum;
 
         public NumberInLine(int startPos, int endPos, int value)
         {
             StartPos = startPos;
             EndPos = endPos;
             Value = value;
-            IsValid = false;
-            IsAddedToTotalSum = false;
-        }
-
-        public void SetIsValid()
-        {
-            if (!IsValid) IsValid = true;
         }
     }
 
-    static bool IsSymbol(char c)
+    class GearAdjacentNumbers
     {
-        return !Char.IsDigit(c) && c != '.';
+        public Dictionary<(int, int, int), NumberInLine> AdjacentNumbers;
+
+        public GearAdjacentNumbers()
+        {
+            AdjacentNumbers = new Dictionary<(int, int, int), NumberInLine>();
+        }
+    }
+
+    static bool IsGear(char c)
+    {
+        return c == '*';
     }
 
     static bool IsValidAdjacent(char c1, char c2)
     {
-        return (Char.IsDigit(c1) && IsSymbol(c2)) || (Char.IsDigit(c2) && IsSymbol(c1));
+        return (Char.IsDigit(c1) && IsGear(c2)) || (Char.IsDigit(c2) && IsGear(c1));
     }
     
-    static (int, Dictionary<int, NumberInLine>) SumOfValidNumberInPreviousLine(string line, string prevLine, Dictionary<int, NumberInLine> prevLinePosToNumberMap)
+    static (
+        int, 
+        Dictionary<int, NumberInLine>, 
+        Dictionary<int, GearAdjacentNumbers>) 
+        SumOfValidNumberInPreviousLine(
+        string line, string prevLine, 
+        Dictionary<int, NumberInLine> prevLinePosToNumberMap, 
+        Dictionary<int, GearAdjacentNumbers> prevLineGearAdjacentNumbers)
     {
-        var numbersInLine = GetAllNumbersInLine(line);
-        var posToNumberMap = GetPosToNumberMap(numbersInLine);
+        var currentLineNumbers = GetAllNumbersInLine(line);
+        var currentLinePosToNumberMap = GetPosToNumberMap(currentLineNumbers);
+        var currentLineGearAdjacentNumbers = new Dictionary<int, GearAdjacentNumbers>();
 
         for (int i = 0; i < line.Length; i++)
         {
             // Check current line symbol with current line digit
-            if (IsSymbol(line[i]))
+            if (IsGear(line[i]))
             {
                 if (i > 0 && IsValidAdjacent(line[i], line[i - 1]))
                 {
-                    posToNumberMap[i - 1].SetIsValid();
+                    if (!currentLineGearAdjacentNumbers.ContainsKey(i))
+                        currentLineGearAdjacentNumbers[i] = new GearAdjacentNumbers();
+
+                    var number = currentLinePosToNumberMap[i - 1];
+                    var key = (0, number.StartPos, number.EndPos);
+                    currentLineGearAdjacentNumbers[i].AdjacentNumbers.TryAdd(key, number);
                 }
 
                 if (i < line.Length - 1 && IsValidAdjacent(line[i], line[i + 1]))
                 {
-                    posToNumberMap[i + 1].SetIsValid();
+                    if (!currentLineGearAdjacentNumbers.ContainsKey(i))
+                        currentLineGearAdjacentNumbers[i] = new GearAdjacentNumbers();
+
+                    var number = currentLinePosToNumberMap[i + 1];
+                    var key = (0, number.StartPos, number.EndPos);
+                    currentLineGearAdjacentNumbers[i].AdjacentNumbers.TryAdd(key, number);
                 }
             }
 
             // Check current line symbol with previous line digit
-            if (IsSymbol(line[i]))
+            if (IsGear(line[i]))
             {
                 for (int step = -1; step <= 1; step++)
                 {
@@ -88,7 +110,12 @@ public class Task3_2
                     {
                         if (IsValidAdjacent(line[i], prevLine[j]))
                         {
-                            prevLinePosToNumberMap[j].SetIsValid();
+                            if (!currentLineGearAdjacentNumbers.ContainsKey(i))
+                                currentLineGearAdjacentNumbers[i] = new GearAdjacentNumbers();
+
+                            var number = prevLinePosToNumberMap[j];
+                            var key = (-1, number.StartPos, number.EndPos);
+                            currentLineGearAdjacentNumbers[i].AdjacentNumbers.TryAdd(key, number);
                         }
                     }
                 }
@@ -104,27 +131,33 @@ public class Task3_2
                     {
                         if (IsValidAdjacent(line[i], prevLine[j]))
                         {
-                            posToNumberMap[i].SetIsValid();
+                            if (!prevLineGearAdjacentNumbers.ContainsKey(j))
+                                prevLineGearAdjacentNumbers[j] = new GearAdjacentNumbers();
+
+                            var number = currentLinePosToNumberMap[i];
+                            var key = (1, number.StartPos, number.EndPos);
+                            prevLineGearAdjacentNumbers[j].AdjacentNumbers.TryAdd(key, number);
                         }
                     }
                 }
             }
         }
 
-        var result = CalculateValidNumbers(prevLinePosToNumberMap);
+        var result = CalculatePrevLineGearRatio(prevLineGearAdjacentNumbers);
 
-        return (result, posToNumberMap);
+        return (result, currentLinePosToNumberMap, currentLineGearAdjacentNumbers);
     }
 
-    static int CalculateValidNumbers(Dictionary<int, NumberInLine> prevLinePosToNumberMap)
+    static int CalculatePrevLineGearRatio(Dictionary<int, GearAdjacentNumbers> prevLineGearAdjacentNumbers)
     {
         var result = 0;
-        foreach (var numberInPrevLine in prevLinePosToNumberMap.Values)
+        foreach (var gearAdjacentNumbers in prevLineGearAdjacentNumbers.Values)
         {
-            if (numberInPrevLine.IsValid && !numberInPrevLine.IsAddedToTotalSum)
+            if (gearAdjacentNumbers.AdjacentNumbers.Count == 2)
             {
-                result += numberInPrevLine.Value;
-                numberInPrevLine.IsAddedToTotalSum = true;
+                var adjacentNumbersArray = gearAdjacentNumbers.AdjacentNumbers.Values.ToArray();
+                var ratio = adjacentNumbersArray[0].Value * adjacentNumbersArray[1].Value;
+                result += ratio;
             }
         }
 
