@@ -4,7 +4,7 @@ public class Task2_1
 {
     public static void ProcessFile()
     {
-        var lines = File.ReadLines("../../../task2.txt");
+        var lines = File.ReadLines("../../../input.txt");
 
         var sum = 0;
         foreach (var line in lines)
