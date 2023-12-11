@@ -11,7 +11,7 @@ public class Task11_1
         Console.WriteLine(result);
     }
 
-    static int ProcessLines(string[] lines)
+    static long ProcessLines(string[] lines)
     {
         var validRows = new SortedDictionary<int, int>();
         var validCols = new SortedDictionary<int, int>();
@@ -39,18 +39,20 @@ public class Task11_1
         // return resultRow;
     }
 
-    static int DP(SortedDictionary<int, int> map)
+    private static long expandedGap = 1000000; 
+        
+    static long DP(SortedDictionary<int, int> map)
     {
         var a = map.Keys.ToArray();
         
-        var D = new int[a.Length];
+        var D = new long[a.Length];
         for (int i = 1; i < a.Length; i++)
         {
-            var distanceBetweenTwo = (a[i] - a[i - 1] - 1) * 2 + 1;
+            long distanceBetweenTwo = (a[i] - a[i - 1] - 1) * expandedGap + 1;
             D[i] = distanceBetweenTwo;
         }
 
-        var sum = 0;
+        long sum = 0;
         for (int i = 1; i < a.Length; i++)
         {
             var distance = D[i];
