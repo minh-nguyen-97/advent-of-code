@@ -43,23 +43,20 @@ public class Task11
     static long CalculateDistances(SortedDictionary<int, int> map)
     {
         var a = map.Keys.ToArray();
-        
-        var D = new long[a.Length];
+        var numOfPoints = new int[a.Length];
+        numOfPoints[0] = map[a[0]];
         for (int i = 1; i < a.Length; i++)
         {
-            long distanceBetweenTwo = (a[i] - a[i - 1] - 1) * expandedGap + 1;
-            D[i] = distanceBetweenTwo;
+            numOfPoints[i] = numOfPoints[i - 1] + map[a[i]];
         }
 
+        var totalNumOfPoints = numOfPoints[a.Length - 1];
+        
         long sum = 0;
         for (int i = 1; i < a.Length; i++)
         {
-            var distance = D[i];
-            for (int j = i-1; j >= 0; j--)
-            {
-                sum += map[a[i]] * map[a[j]] * distance;
-                distance += D[j];
-            }
+            long distanceBetweenTwo = (a[i] - a[i - 1] - 1) * expandedGap + 1;
+            sum += numOfPoints[i - 1] * distanceBetweenTwo * (totalNumOfPoints - numOfPoints[i - 1]);
         }
 
         return sum;
