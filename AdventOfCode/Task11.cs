@@ -1,6 +1,6 @@
 ﻿namespace AdventOfCode;
 
-public class Task11_1
+public class Task11
 {
     public static void ProcessFile()
     {
