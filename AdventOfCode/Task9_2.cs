@@ -22,7 +22,7 @@ public class Task9_2
             .Select(x => Int32.Parse(x.Trim()))
             .ToArray();
 
-        return CalculateNextNumber(numbers);
+        return CalculatePrevNumber(numbers);
     }
 
     static bool IsAllNumbersEqual(int[] numbers)
@@ -36,7 +36,7 @@ public class Task9_2
         return true;
     }
     
-    static int CalculateNextNumber(int[] numbers)
+    static int CalculatePrevNumber(int[] numbers)
     {
         if (IsAllNumbersEqual(numbers)) return numbers[0];
 
@@ -46,7 +46,7 @@ public class Task9_2
             nextArr[i] = numbers[i + 1] - numbers[i];
         }
 
-        var nextArrNextNumber = CalculateNextNumber(nextArr);
-        return numbers[numbers.Length - 1] + nextArrNextNumber;
+        var nextArrPrevNumber = CalculatePrevNumber(nextArr);
+        return numbers[0] - nextArrPrevNumber;
     }
 }
