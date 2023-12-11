@@ -25,11 +25,29 @@ public class Task8_2
         }
     }
 
-    static int ProcessLines(string[] lines)
+    static long GCD(long a, long b)
+    {
+        while (a > 0 && b > 0)
+        {
+            if (a > b)
+            {
+                a %= b;
+            }
+            else
+            {
+                b %= a;
+            }
+        }
+
+        return a == 0 ? b : a;
+    }
+
+    static long ProcessLines(string[] lines)
     {
         var instruction = lines[0];
 
         var network = new Dictionary<string, Node>();
+        var startingNodes = new List<Node>();
         for (int i = 2; i < lines.Length; i++)
         {
             var parts = lines[i].Split(" = ");
@@ -39,18 +57,26 @@ public class Task8_2
             var right = leftRightParts[1];
             var node = new Node(value, left, right);
             network[value] = node;
+            if(value.EndsWith("A")) startingNodes.Add(node);
         }
 
-        return Traverse(instruction, network);
+        long overallSteps = 1;
+        foreach (var startingNode in startingNodes)
+        {
+            var steps = Traverse(instruction, network, startingNode);
+            overallSteps = (overallSteps * steps) / GCD(overallSteps, steps);
+        }
+
+        return overallSteps;
     }
 
-    static int Traverse(string instruction, Dictionary<string, Node> network)
+    static int Traverse(string instruction, Dictionary<string, Node> network, Node startingNode)
     {
-        var currentNode = network["AAA"];
+        var currentNode = startingNode;
         var steps = 0;
         var instructionIndex = 0;
 
-        while (currentNode.Value != "ZZZ")
+        while (!currentNode.Value.EndsWith("Z"))
         {
             if (instruction[instructionIndex] == 'L') currentNode = network[currentNode.Left];
             if (instruction[instructionIndex] == 'R') currentNode = network[currentNode.Right];
