@@ -32,16 +32,15 @@ public class Task11
             }
         }
 
-        var resultRow = DP(validRows);
-        var resultCol = DP(validCols);
+        var resultRow = CalculateDistances(validRows);
+        var resultCol = CalculateDistances(validCols);
 
         return resultRow + resultCol;
-        // return resultRow;
     }
 
     private static long expandedGap = 1000000; 
         
-    static long DP(SortedDictionary<int, int> map)
+    static long CalculateDistances(SortedDictionary<int, int> map)
     {
         var a = map.Keys.ToArray();
         
