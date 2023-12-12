@@ -35,8 +35,10 @@ public class Task12_1
     static int ProcessLine(string line)
     {
         var parts = line.Split(" ");
-        var a = "." + parts[0];
-        var b = parts[1].Split(",").Select(x => Int32.Parse(x)).ToArray();
+        var a = "#." + parts[0];
+        var bList = parts[1].Split(",").Select(x => Int32.Parse(x)).ToList();
+        bList.Insert(0, 1);
+        var b = bList.ToArray();
 
         var possibleContinuous = new bool[a.Length, a.Length];
         for (int i = 0; i < a.Length; i++)
@@ -61,39 +63,34 @@ public class Task12_1
             }
         }
 
-        var F = new int[a.Length, b.Length];
+        var F = new int[a.Length, b.Length, 2];
+        F[0, 0, 1] = 1;
+        F[1, 0, 0] = 1;
 
-        for (int i = 1; i < a.Length; i++)
+        for (int j = 0; j < b.Length; j++)
         {
-            if (a[i] == '.' || a[i] == '?')
+            for (int i = 2; i < a.Length; i++)
             {
-                F[i, 0] = F[i - 1, 0];
-            }
-
-            if (i >= b[0] && possibleContinuous[i - b[0] + 1, i] )
-            {
-                var continuousWays = 0;
-                if (i == b[0]) continuousWays = 1;
-                if (i > b[0]) continuousWays = F[i - b[0] - 1, 0] + 1;
-                if (a[i] == '#') F[i, 0] = continuousWays;
-                if (a[i] == '?') F[i, 0] += continuousWays;
-            }
-        }
-
-        for (int j = 1; j < b.Length; j++)
-        {
-            for (int i = 1; i < a.Length; i++)
-            {
-                if (a[i] == '.' || a[i] == '?') F[i, j] = F[i - 1, j];
-                if (i - b[j] > 0 && IsPossibleBlock(a[i - b[j]]) && possibleContinuous[i - b[j] + 1, i])
+                if (a[i] == '.' || a[i] == '?')
                 {
-                    if (a[i] == '#') F[i, j] = F[i - b[j] - 1, j - 1];
-                    if (a[i] == '?') F[i, j] += F[i - b[j] - 1, j - 1];
+                    F[i, j, 0] = F[i - 1, j, 0] + F[i - 1, j, 1];
                 }
 
+                if (a[i] == '#' || a[i] == '?')
+                {
+                    if (i > b[j] && j > 0 && possibleContinuous[i - b[j] + 1, i])
+                        F[i, j, 1] = F[i - b[j], j - 1, 0];
+                }
             }
         }
 
-        return F[a.Length - 1, b.Length - 1];
+
+        var result = 0;
+
+        if (a[a.Length - 1] == '.') result = F[a.Length - 1, b.Length - 1, 0];
+        if (a[a.Length - 1] == '#') result = F[a.Length - 1, b.Length - 1, 1];
+        if (a[a.Length - 1] == '?') result = F[a.Length - 1, b.Length - 1, 0] + F[a.Length - 1, b.Length - 1, 1];
+
+        return result;
     }
 }

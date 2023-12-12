@@ -16,4 +16,4 @@ using AdventOfCode;
 // Task10_1.ProcessFile();
 // Task10_2.ProcessFile();
 // Task11.ProcessFile();
-Task12_1_BruteForce.ProcessFile();
+Task12_1.ProcessFile();
