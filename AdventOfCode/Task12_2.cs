@@ -6,7 +6,7 @@ public class Task12_2
     {
         var lines = File.ReadLines("../../../input.txt");
 
-        var sum = 0;
+        long sum = 0;
         foreach (var line in lines)
         {
             sum += ProcessLine(line);
@@ -20,11 +20,25 @@ public class Task12_2
         return c == '#' || c == '?';
     }
 
-    static int ProcessLine(string line)
+    private static int unfoldTimes = 5;
+    
+    static long ProcessLine(string line)
     {
         var parts = line.Split(" ");
-        var a = "#." + parts[0];
-        var bList = parts[1].Split(",").Select(x => Int32.Parse(x)).ToList();
+        
+        var firstPart = parts[0];
+        for (int i = 0; i < unfoldTimes - 1; i++)
+        {
+            firstPart += "?" + parts[0];
+        }
+        var a = "#." + firstPart;
+        
+        var secondPart = parts[1].Split(",").Select(x => Int32.Parse(x)).ToList();
+        var bList = new List<int>(secondPart);
+        for (int i = 0; i < unfoldTimes - 1; i++)
+        {
+            bList.AddRange(new List<int>(secondPart));
+        }
         bList.Insert(0, 1);
         var b = bList.ToArray();
 
@@ -51,7 +65,7 @@ public class Task12_2
             }
         }
 
-        var F = new int[a.Length, b.Length, 2];
+        var F = new long[a.Length, b.Length, 2];
         F[0, 0, 1] = 1;
         F[1, 0, 0] = 1;
 
@@ -72,8 +86,7 @@ public class Task12_2
             }
         }
 
-
-        var result = 0;
+        long result = 0;
 
         if (a[a.Length - 1] == '.') result = F[a.Length - 1, b.Length - 1, 0];
         if (a[a.Length - 1] == '#') result = F[a.Length - 1, b.Length - 1, 1];
