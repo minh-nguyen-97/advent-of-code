@@ -19,18 +19,6 @@ public class Task12_1
     {
         return c == '#' || c == '?';
     }
-    
-    
-    static bool IsPossibleBlock(Char c)
-    {
-        return c == '.' || c == '?';
-    }
-
-    static bool IsRealPossible(Char c)
-    {
-        return c == '?';
-    }
-
 
     static int ProcessLine(string line)
     {
