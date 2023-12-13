@@ -93,7 +93,7 @@ public class Task13_2
                 rightReflection++;
             }
 
-            if (foundReflection)
+            if (foundReflection && hasSmudge)
             {
                 return i + 1;
             }
