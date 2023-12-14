@@ -41,25 +41,13 @@ public class Task14_2
         var height = a.GetLength(0);
 
         var (trace, loopStartIndex) = DetectLoop(a);
-        // var loopLength = trace.Count - loopStartIndex;
-        // var positionInLoop = (NUM_OF_CYCLES - loopStartIndex) % loopLength;
-        // var finalState = trace[loopStartIndex + positionInLoop];
-        // var finalStateGrid = ConvertStringToArray(finalState, width, height);
-        
-        // var result = CalculateLoad(finalStateGrid);
-        // return result;
+        var loopLength = trace.Count - loopStartIndex;
+        var positionInLoop = (NUM_OF_CYCLES - loopStartIndex) % loopLength;
+        var finalState = trace[loopStartIndex + positionInLoop];
+        var finalStateGrid = ConvertStringToArray(finalState, width, height);
 
-        for (int i = 0; i < trace.Count; i++)
-        {
-            var state = trace[i];
-            var stateGrid = ConvertStringToArray(state, width, height);
-            // if (CalculateLoad(stateGrid) == 64)
-            // {
-                Console.WriteLine(CalculateLoad(stateGrid));
-            // }
-        }
-
-        return -1;
+        var result = CalculateLoad(finalStateGrid);
+        return result;
     }
 
     static (List<string>, int) DetectLoop(int[,] a)
@@ -110,20 +98,6 @@ public class Task14_2
         return a;
     }
 
-    static void Print(int[,] a)
-    {
-        var width = a.GetLength(1);
-        var height = a.GetLength(0);
-        for (int i = 0; i < height; i++)
-        {
-            for (int j = 0; j < width; j++)
-            {
-                Console.Write(a[i,j]);
-            }
-            Console.WriteLine();
-        }
-    }
-
     static void CycleRotate(int[,] a)
     {
         RotateNorthSouth(a, true);
@@ -139,11 +113,9 @@ public class Task14_2
         for (int j = 0; j < width; j++)
         {
             var numOfTempRocks = 0;
+            
             var currentBlockIndex = isRotateNorth ? -1 : height;
-
-            var iStart = isRotateNorth ? 0 : height - 1;
-            var iEnd = isRotateNorth ? height - 1 : 0;
-            var iIncrement = isRotateNorth ? 1 : -1;
+            var (iStart, iEnd, iIncrement) = isRotateNorth ? (0, height - 1, 1) : (height - 1, 0, -1);
             for (int i = iStart; i != iEnd + iIncrement; i += iIncrement)
             {
                 if (a[i, j] == 1)
@@ -173,11 +145,9 @@ public class Task14_2
         for (int i = 0; i < height; i++)
         {
             var numOfTempRocks = 0;
-            var currentBlockIndex = isRotateWest ? -1 : width;
 
-            var jStart = isRotateWest ? 0 : width - 1;
-            var jEnd = isRotateWest ? width - 1 : 0;
-            var jIncrement = isRotateWest ? 1 : -1;
+            var currentBlockIndex = isRotateWest ? -1 : width;
+            var (jStart, jEnd, jIncrement) = isRotateWest ? (0, width - 1, 1) : (width - 1, 0, -1);
             for (int j = jStart; j != jEnd + jIncrement; j += jIncrement)
             {
                 if (a[i, j] == 1)
@@ -207,23 +177,11 @@ public class Task14_2
         var sum = 0;
         for (int j = 0; j < width; j++)
         {
-            var tempRocks = 0;
-            var currentBlock = -1;
             for (int i = 0; i < height; i++)
             {
-                if (a[i,j] == 1) tempRocks++;
-                if (a[i,j] == 2 || i == height - 1)
+                if (a[i, j] == 1)
                 {
-                    var currentStart = currentBlock + 1;
-                    for (int k = 0; k < tempRocks ; k++)
-                    {
-                        var tiltedRockIdx = currentStart + k;
-                        var load = height - tiltedRockIdx;
-                        sum += load;
-                    }
-
-                    currentBlock = i;
-                    tempRocks = 0;
+                    sum += height - i;
                 }
             }
         }
@@ -231,54 +189,36 @@ public class Task14_2
         return sum;
     }
 
+    // Print Helpers
+    static void PrintGrid(int[,] a)
+    {
+        var width = a.GetLength(1);
+        var height = a.GetLength(0);
+        for (int i = 0; i < height; i++)
+        {
+            for (int j = 0; j < width; j++)
+            {
+                char c = '.';
+                if (a[i, j] == 0) c = '.';
+                if (a[i, j] == 1) c = 'O';
+                if (a[i, j] == 2) c = '#';
+                Console.Write(c);
+            }
+            Console.WriteLine();
+        }
+    }
+    
+    static void Print(int[,] a)
+    {
+        var width = a.GetLength(1);
+        var height = a.GetLength(0);
+        for (int i = 0; i < height; i++)
+        {
+            for (int j = 0; j < width; j++)
+            {
+                Console.Write(a[i,j]);
+            }
+            Console.WriteLine();
+        }
+    }
 }
-
-/*
-O....#....
-O.OO#....#
-.....##...
-OO.#O....O
-.O.....O#.
-O.#..O.#.#
-..O..#O..O
-.......O..
-#....###..
-#OO..#....
-
-After 1 cycle:
-.....#....
-....#...O#
-...OO##...
-.OO#......
-.....OOO#.
-.O#...O#.#
-....O#....
-......OOOO
-#...O###..
-#..OO#....
-
-After 2 cycles:
-.....#....
-....#...O#
-.....##...
-..O#......
-.....OOO#.
-.O#...O#.#
-....O#...O
-.......OOO
-#..OO###..
-#.OOO#...O
-
-After 3 cycles:
-.....#....
-....#...O#
-.....##...
-..O#......
-.....OOO#.
-.O#...O#.#
-....O#...O
-.......OOO
-#...O###.O
-#.OOO#...O
-
-*/
