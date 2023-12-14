@@ -37,38 +37,54 @@ public class Task14_2
     static int ProcessGrid(string[] grid)
     {
         var a = CreateNewGrid(grid);
+        RotateNorthSouth(a, true);
+        Print(a);
         var result = CalculateLoad(a);
         return result;
     }
-    
-    static void RotateNorth(int[,] a)
+
+    static void Print(int[,] a)
     {
         var width = a.GetLength(1);
         var height = a.GetLength(0);
-        for (int j = 0; j < height; j++)
+        for (int i = 0; i < height; i++)
         {
-            var tempRocks = new Dictionary<int, int>();
+            for (int j = 0; j < width; j++)
+            {
+                Console.Write(a[i,j]);
+            }
+            Console.WriteLine();
+        }
+    }
+    
+    static void RotateNorthSouth(int[,] a, bool isRotateNorth)
+    {
+        var width = a.GetLength(1);
+        var height = a.GetLength(0);
+        for (int j = 0; j < width; j++)
+        {
             var numOfTempRocks = 0;
-            var currentBlock = -1;
-            for (int i = 0; i < width; i++)
+            var currentBlockIndex = isRotateNorth ? -1 : height;
+
+            var iStart = isRotateNorth ? 0 : height - 1;
+            var iEnd = isRotateNorth ? height - 1 : 0;
+            var iIncrement = isRotateNorth ? 1 : -1;
+            for (int i = iStart; i != iEnd + iIncrement; i += iIncrement)
             {
                 if (a[i, j] == 1)
                 {
                     numOfTempRocks++;
-                    tempRocks[numOfTempRocks] = i;
+                    a[i, j] = 0;
                 }
-                if (a[i, j] == 2 || i == height - 1)
+                if (a[i, j] == 2 || i == iEnd)
                 {
-                    var currentStart = currentBlock + 1;
-                    for (int k = 0; k < numOfTempRocks ; k++)
+                    for (int k = 1; k <= numOfTempRocks ; k++)
                     {
-                        var tiltedRockIdx = currentStart + k;
-                        a[tempRocks[k], j] = 0;
+                        var tiltedRockIdx = currentBlockIndex + k * iIncrement;
                         a[tiltedRockIdx,j] = 1;
                     }
 
-                    currentBlock = i;
-                    tempRocks = new Dictionary<int, int>();
+                    currentBlockIndex = i;
                     numOfTempRocks = 0;
                 }
             }
@@ -119,6 +135,8 @@ O.#..O.#.#
 .......O..
 #....###..
 #OO..#....
+
+
 
 After 1 cycle:
 .....#....
