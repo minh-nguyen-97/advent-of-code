@@ -4,22 +4,81 @@ namespace AdventOfCode;
 
 public class Task14_2
 {
+    // '.' = 0
+    // 'O' = 1
+    // '#' = 2
     public static void ProcessFile()
     {
         var lines = File.ReadLines("../../../input.txt");
 
-        var grid = lines.ToList();
-        grid.Add(CreateBlockLine(grid[0].Length));
-        var result = ProcessGrid(grid.ToArray());
+        var result = ProcessGrid(lines.ToArray());
         
         Console.WriteLine(result);
     }
 
+    static int[,] CreateNewGrid(string[] grid)
+    {
+        var a = new int[grid.Length, grid[0].Length];
+        for (int i = 0; i < grid.Length; i++)
+        {
+            for (int j = 0; j < grid[0].Length; j++)
+            {
+                if (grid[i][j] == '.') a[i, j] = 0;
+                if (grid[i][j] == 'O') a[i, j] = 1;
+                if (grid[i][j] == '#') a[i, j] = 2;
+            }
+        }
+
+        return a;
+    }
+
+    
+
     static int ProcessGrid(string[] grid)
     {
-        var width = grid[0].Length;
-        var height = grid.Length;
-        var realHeight = height - 1;
+        var a = CreateNewGrid(grid);
+        var result = CalculateLoad(a);
+        return result;
+    }
+    
+    static void RotateNorth(int[,] a)
+    {
+        var width = a.GetLength(1);
+        var height = a.GetLength(0);
+        for (int j = 0; j < height; j++)
+        {
+            var tempRocks = new Dictionary<int, int>();
+            var numOfTempRocks = 0;
+            var currentBlock = -1;
+            for (int i = 0; i < width; i++)
+            {
+                if (a[i, j] == 1)
+                {
+                    numOfTempRocks++;
+                    tempRocks[numOfTempRocks] = i;
+                }
+                if (a[i, j] == 2 || i == height - 1)
+                {
+                    var currentStart = currentBlock + 1;
+                    for (int k = 0; k < numOfTempRocks ; k++)
+                    {
+                        var tiltedRockIdx = currentStart + k;
+                        a[tempRocks[k], j] = 0;
+                        a[tiltedRockIdx,j] = 1;
+                    }
+
+                    currentBlock = i;
+                    tempRocks = new Dictionary<int, int>();
+                    numOfTempRocks = 0;
+                }
+            }
+        }
+    }
+
+    static int CalculateLoad(int[,] a)
+    {
+        var width = a.GetLength(1);
+        var height = a.GetLength(0);
         var sum = 0;
         for (int j = 0; j < width; j++)
         {
@@ -27,14 +86,14 @@ public class Task14_2
             var currentBlock = -1;
             for (int i = 0; i < height; i++)
             {
-                if (grid[i][j] == 'O') tempRocks++;
-                if (grid[i][j] == '#')
+                if (a[i,j] == 1) tempRocks++;
+                if (a[i,j] == 2 || i == height - 1)
                 {
                     var currentStart = currentBlock + 1;
                     for (int k = 0; k < tempRocks ; k++)
                     {
                         var tiltedRockIdx = currentStart + k;
-                        var load = realHeight - tiltedRockIdx;
+                        var load = height - tiltedRockIdx;
                         sum += load;
                     }
 
@@ -47,16 +106,6 @@ public class Task14_2
         return sum;
     }
 
-    static string CreateBlockLine(int length)
-    {
-        var s = new StringBuilder();
-        for (int i = 0; i < length; i++)
-        {
-            s.Append("#");
-        }
-
-        return s.ToString();
-    }
 }
 
 /*
