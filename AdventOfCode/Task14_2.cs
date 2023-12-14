@@ -37,7 +37,10 @@ public class Task14_2
     static int ProcessGrid(string[] grid)
     {
         var a = CreateNewGrid(grid);
-        RotateNorthSouth(a, true);
+        CycleRotate(a);
+        CycleRotate(a);
+        CycleRotate(a);
+        
         Print(a);
         var result = CalculateLoad(a);
         return result;
@@ -55,6 +58,14 @@ public class Task14_2
             }
             Console.WriteLine();
         }
+    }
+
+    static void CycleRotate(int[,] a)
+    {
+        RotateNorthSouth(a, true);
+        RotateWestEast(a, true);
+        RotateNorthSouth(a, false);
+        RotateWestEast(a, false);
     }
     
     static void RotateNorthSouth(int[,] a, bool isRotateNorth)
@@ -81,10 +92,44 @@ public class Task14_2
                     for (int k = 1; k <= numOfTempRocks ; k++)
                     {
                         var tiltedRockIdx = currentBlockIndex + k * iIncrement;
-                        a[tiltedRockIdx,j] = 1;
+                        a[tiltedRockIdx, j] = 1;
                     }
 
                     currentBlockIndex = i;
+                    numOfTempRocks = 0;
+                }
+            }
+        }
+    }
+    
+    static void RotateWestEast(int[,] a, bool isRotateWest)
+    {
+        var width = a.GetLength(1);
+        var height = a.GetLength(0);
+        for (int i = 0; i < height; i++)
+        {
+            var numOfTempRocks = 0;
+            var currentBlockIndex = isRotateWest ? -1 : width;
+
+            var jStart = isRotateWest ? 0 : width - 1;
+            var jEnd = isRotateWest ? width - 1 : 0;
+            var jIncrement = isRotateWest ? 1 : -1;
+            for (int j = jStart; j != jEnd + jIncrement; j += jIncrement)
+            {
+                if (a[i, j] == 1)
+                {
+                    numOfTempRocks++;
+                    a[i, j] = 0;
+                }
+                if (a[i, j] == 2 || j == jEnd)
+                {
+                    for (int k = 1; k <= numOfTempRocks ; k++)
+                    {
+                        var tiltedRockIdx = currentBlockIndex + k * jIncrement;
+                        a[i, tiltedRockIdx] = 1;
+                    }
+
+                    currentBlockIndex = j;
                     numOfTempRocks = 0;
                 }
             }
@@ -135,8 +180,6 @@ O.#..O.#.#
 .......O..
 #....###..
 #OO..#....
-
-
 
 After 1 cycle:
 .....#....
