@@ -32,18 +32,82 @@ public class Task14_2
         return a;
     }
 
-    
+    private static readonly int NUM_OF_CYCLES = 1000000000;
 
     static int ProcessGrid(string[] grid)
     {
         var a = CreateNewGrid(grid);
-        CycleRotate(a);
-        CycleRotate(a);
-        CycleRotate(a);
+        var width = a.GetLength(1);
+        var height = a.GetLength(0);
+
+        var (trace, loopStartIndex) = DetectLoop(a);
+        // var loopLength = trace.Count - loopStartIndex;
+        // var positionInLoop = (NUM_OF_CYCLES - loopStartIndex) % loopLength;
+        // var finalState = trace[loopStartIndex + positionInLoop];
+        // var finalStateGrid = ConvertStringToArray(finalState, width, height);
         
-        Print(a);
-        var result = CalculateLoad(a);
-        return result;
+        // var result = CalculateLoad(finalStateGrid);
+        // return result;
+
+        for (int i = 0; i < trace.Count; i++)
+        {
+            var state = trace[i];
+            var stateGrid = ConvertStringToArray(state, width, height);
+            // if (CalculateLoad(stateGrid) == 64)
+            // {
+                Console.WriteLine(CalculateLoad(stateGrid));
+            // }
+        }
+
+        return -1;
+    }
+
+    static (List<string>, int) DetectLoop(int[,] a)
+    {
+        var visitedState = new Dictionary<string, int>();
+        var trace = new List<string>();
+        var state = ConvertArrayToString(a);
+        var num = 0;
+        while (!visitedState.ContainsKey(state))
+        {
+            visitedState.Add(state, num);
+            trace.Add(state);
+            num++;
+            CycleRotate(a);
+            state = ConvertArrayToString(a);
+        }
+
+        return (trace, visitedState[state]);
+    }
+
+    static string ConvertArrayToString(int[,] a)
+    {
+        var sb = new StringBuilder();
+        var width = a.GetLength(1);
+        var height = a.GetLength(0);
+        for (int i = 0; i < height; i++)
+        {
+            for (int j = 0; j < width; j++)
+            {
+                sb.Append(a[i, j].ToString());
+            }
+        }
+
+        return sb.ToString();
+    }
+    
+    static int[,] ConvertStringToArray(string state, int width, int height)
+    {
+        var a = new int[height, width];
+        for (int i = 0; i < height; i++)
+        {
+            for (int j = 0; j < width; j++)
+            {
+                a[i, j] = state[i * height + j] - '0';
+            }
+        }
+
+        return a;
     }
 
     static void Print(int[,] a)
