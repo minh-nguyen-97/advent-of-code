@@ -23,4 +23,5 @@ using AdventOfCode;
 // Task14_2.ProcessFile();
 // Task15_1.ProcessFile();
 // Task15_2.ProcessFile();
-Task18_1.ProcessFile();
+// Task18_1.ProcessFile();
+Task18_2.ProcessFile();
