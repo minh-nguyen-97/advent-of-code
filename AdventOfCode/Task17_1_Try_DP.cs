@@ -1,6 +1,6 @@
 ﻿namespace AdventOfCode;
 
-public class Task17_1
+public class Task17_1_Try_DP
 {
     public static void ProcessFile()
     {
@@ -42,6 +42,17 @@ public class Task17_1
         F[0, 0, 0] = 0;
         F[0, 0, 1] = 0;
         HandleNorthToSouthAndWestToEast(height, width, a, F);
+        HandleSouthToNorth(height, width, a, F);
+        HandleNorthToSouthAndWestToEast(height, width, a, F);
+        HandleEastToWest(height, width, a, F);
+        HandleNorthToSouthAndWestToEast(height, width, a, F);
+
+        var result = Math.Min(F[height - 1, width - 1, 0], F[height - 1, width - 1, 1]);
+        return result;
+    }
+
+    static int OptimizeRoute(int height, int width, int[,] a, int[,,] F)
+    {
         HandleSouthToNorth(height, width, a, F);
         HandleNorthToSouthAndWestToEast(height, width, a, F);
         HandleEastToWest(height, width, a, F);

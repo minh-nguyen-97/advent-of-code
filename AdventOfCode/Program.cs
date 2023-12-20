@@ -23,7 +23,7 @@ using AdventOfCode;
 // Task14_2.ProcessFile();
 // Task15_1.ProcessFile();
 // Task15_2.ProcessFile();
-Task17_1.ProcessFile();
+Task17_1_Try_DP.ProcessFile();
 // Task18_1.ProcessFile();
 // Task18_2.ProcessFile();
 // Task19_1.ProcessFile();
