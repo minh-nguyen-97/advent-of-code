@@ -35,7 +35,7 @@ public class Task21_1
         return result;
     }
     
-    static readonly int MAX_NUM_STEPS = 6;
+    static readonly int MAX_NUM_STEPS = 64;
     private static readonly int MAX_NUM_DIRECTIONS = 4;
     private static readonly (int, int)[] directions = { (1, 0), (0, 1), (0, -1), (-1, 0) };
     
