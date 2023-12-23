@@ -24,7 +24,10 @@ public class Task23_1
             if (lines[height - 1][j] == '.') endPoint = (height - 1, j);
         }
 
-        var result = BFS(lines, startPoint, endPoint);
+        var visited = new SortedSet<(int, int)>();
+        visited.Add(startPoint);
+
+        var result = DFS(startPoint, 0, visited, lines, endPoint);
 
         return result;
     }
@@ -44,103 +47,34 @@ public class Task23_1
         return new[] { 0, 1, 2, 3 };
     }
 
-    static int BFS(string[] lines, (int, int) startPoint, (int, int) endPoint)
+    static int DFS((int, int) currentPoint, int currentSteps, SortedSet<(int, int)> visited, string[] lines, (int, int) endPoint)
     {
-        var height = lines.Length;
-        var width = lines[0].Length;
-        var queue = new Queue<(int, int)>();
-        var F = new int[height, width];
-        var visited = new SortedSet<(int, int)>();
-        var trace = new (int, int)[height, width];
-
-        queue.Enqueue(startPoint);
-        visited.Add(startPoint);
-        while (queue.Count > 0)
+        if (currentPoint.Item1 == endPoint.Item1 && currentPoint.Item2 == endPoint.Item2)
         {
-            var currentPoint = queue.Dequeue();
-            var (currentI, currentJ) = currentPoint;
+            return currentSteps;
+        }
 
-            var compatibleDirections = FindCompatibleDirection(lines[currentI][currentJ]);
-            for (int d = 0; d < compatibleDirections.Length; d++)
+        var longestPath = 0;
+        var compatibleDirections = FindCompatibleDirection(lines[currentPoint.Item1][currentPoint.Item2]);
+        for (int dIndex = 0; dIndex < compatibleDirections.Length; dIndex++)
+        {
+            var nextD = compatibleDirections[dIndex];
+            var nextPoint = (currentPoint.Item1 + directions[nextD].Item1, currentPoint.Item2 + directions[nextD].Item2);
+            if (isWithinBound(nextPoint.Item1, nextPoint.Item2, lines.Length, lines[0].Length)
+                && !visited.Contains(nextPoint) && lines[nextPoint.Item1][nextPoint.Item2] != '#')
             {
-                var dIndex = compatibleDirections[d];
-                var (nextI, nextJ) = (currentI + directions[dIndex].Item1, currentJ + directions[dIndex].Item2);
-                if (isWithinBound(nextI, nextJ, height, width))
-                {
-                    if (lines[nextI][nextJ] != '#')
-                    {
-                        var nextPoint = (nextI, nextJ);
-                        if (!visited.Contains(nextPoint))
-                        {
-                            visited.Add(nextPoint);
-                            trace[nextI, nextJ] = currentPoint;
-                            F[nextI, nextJ] = F[currentI, currentJ] + 1;
-                            queue.Enqueue(nextPoint);
-                        }
-                        else
-                        {
-                            if (F[currentI, currentJ] + 1 > F[nextI, nextJ] 
-                                && (trace[currentI, currentJ].Item1 != nextI 
-                                || trace[currentI, currentJ].Item2 != nextJ))
-                            {
-                                F[nextI, nextJ] = F[currentI, currentJ] + 1;
-                                trace[nextI, nextJ] = (currentI, currentJ);
-                                queue.Enqueue(nextPoint);
-                            }
-                        }
-                    }
-                }
+                visited.Add(nextPoint);
+                var longestPathNextPoint = DFS(nextPoint, currentSteps + 1, visited, lines, endPoint);
+                longestPath = Math.Max(longestPath, longestPathNextPoint);
+                visited.Remove(nextPoint);
             }
         }
-        
-        // PrintF(height, width, F);
 
-        var tempPoint = endPoint;
-        var steps = 0;
-
-        while (tempPoint.Item1 != startPoint.Item1 || tempPoint.Item2 != startPoint.Item2)
-        {
-            steps++;
-            tempPoint = trace[tempPoint.Item1, tempPoint.Item2];
-        }
-
-        return steps;
+        return longestPath;
     }
     
     static bool isWithinBound(int i, int j, int height, int width)
     {
         return 0 <= i && i < height && 0 <= j && j < width;
     }
-
-    static void PrintF(int height, int width, int[,] F)
-    {
-        Console.WriteLine("F[,] = ");
-        Console.Write($"{"", -4}");
-        for (int j = 0; j < width; j++)
-        {
-            Console.Write($"{j, -4}");
-        }
-        Console.WriteLine();
-        for (int i = 0; i < height; i++)
-        {
-            Console.Write($"{i,-4}");
-            for (int j = 0; j < width; j++)
-            {
-                Console.Write($"{F[i,j], -4}");
-            }
-            Console.WriteLine();
-        }
-    }
-    
-        
-    // Console.WriteLine("trace[,] = ");
-    // for (int i = 0; i < height; i++)
-    // {
-    //     for (int j = 0; j < width; j++)
-    //     {
-    //         var tempTrace = $"({trace[i, j].Item1}, {trace[i, j].Item2})";
-    //         Console.Write($"{tempTrace, -10}");
-    //     }
-    //     Console.WriteLine();
-    // }
 }
