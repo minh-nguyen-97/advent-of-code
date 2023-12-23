@@ -35,7 +35,7 @@ public class Task23_1
     // direction 3 = From South to North
     private static readonly (int, int)[] directions = { (1, 0), (0, 1), (0, -1), (-1, 0) };
 
-    static int[] findCompatibleDirection(char point)
+    static int[] FindCompatibleDirection(char point)
     {
         if (point == 'v') return new[] { 0 };
         if (point == '>') return new[] { 1 };
@@ -55,17 +55,12 @@ public class Task23_1
 
         queue.Enqueue(startPoint);
         visited.Add(startPoint);
-        var test = false;
         while (queue.Count > 0)
         {
             var currentPoint = queue.Dequeue();
             var (currentI, currentJ) = currentPoint;
-            if (currentI == 12 && currentJ == 13)
-            {
-                test = true;
-            }
 
-            var compatibleDirections = findCompatibleDirection(lines[currentI][currentJ]);
+            var compatibleDirections = FindCompatibleDirection(lines[currentI][currentJ]);
             for (int d = 0; d < compatibleDirections.Length; d++)
             {
                 var dIndex = compatibleDirections[d];
@@ -85,8 +80,8 @@ public class Task23_1
                         else
                         {
                             if (F[currentI, currentJ] + 1 > F[nextI, nextJ] 
-                                && trace[currentI, currentJ].Item1 != nextI 
-                                && trace[currentI, currentJ].Item2 != nextJ)
+                                && (trace[currentI, currentJ].Item1 != nextI 
+                                || trace[currentI, currentJ].Item2 != nextJ))
                             {
                                 F[nextI, nextJ] = F[currentI, currentJ] + 1;
                                 trace[nextI, nextJ] = (currentI, currentJ);
@@ -97,6 +92,8 @@ public class Task23_1
                 }
             }
         }
+        
+        // PrintF(height, width, F);
 
         var tempPoint = endPoint;
         var steps = 0;
@@ -114,23 +111,27 @@ public class Task23_1
     {
         return 0 <= i && i < height && 0 <= j && j < width;
     }
+
+    static void PrintF(int height, int width, int[,] F)
+    {
+        Console.WriteLine("F[,] = ");
+        Console.Write($"{"", -4}");
+        for (int j = 0; j < width; j++)
+        {
+            Console.Write($"{j, -4}");
+        }
+        Console.WriteLine();
+        for (int i = 0; i < height; i++)
+        {
+            Console.Write($"{i,-4}");
+            for (int j = 0; j < width; j++)
+            {
+                Console.Write($"{F[i,j], -4}");
+            }
+            Console.WriteLine();
+        }
+    }
     
-    // Console.WriteLine("F[,] = ");
-    // Console.Write($"{"", -4}");
-    // for (int j = 0; j < width; j++)
-    // {
-    //     Console.Write($"{j, -4}");
-    // }
-    // Console.WriteLine();
-    // for (int i = 0; i < height; i++)
-    // {
-    //     Console.Write($"{i,-4}");
-    //     for (int j = 0; j < width; j++)
-    //     {
-    //         Console.Write($"{F[i,j], -4}");
-    //     }
-    //     Console.WriteLine();
-    // }
         
     // Console.WriteLine("trace[,] = ");
     // for (int i = 0; i < height; i++)
