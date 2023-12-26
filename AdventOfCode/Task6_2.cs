@@ -21,14 +21,27 @@ public class Task6_2
 
     static int ProcessTimeDistance(int totalTime, int goalDistance)
     {
-        var count = 0;
-        for (int holdingTime = 1; holdingTime < totalTime; holdingTime++)
+        var middleTime = totalTime / 2;
+        if (middleTime * (totalTime - middleTime) <= goalDistance) return 0;
+        
+        var (start, end) = (1, middleTime);
+        while (start <= end)
         {
-            var restOfTime = totalTime - holdingTime;
-            var coveredDistance = holdingTime * restOfTime;
-            if (coveredDistance > goalDistance) count++;
+            var mid = (start + end) / 2;
+            if (mid * (totalTime - mid) <= goalDistance)
+            {
+                start = mid + 1;
+            }
+            else
+            {
+                end = mid - 1;
+            }
         }
-        return count;
+
+        var breakPoint = end;
+        var result = totalTime - 1 - breakPoint * 2;
+
+        return result;
     }
 
     static int[] ParseArray(string line)
